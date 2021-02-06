@@ -3,14 +3,15 @@ import csv
 NUMBER_OF_ATTRIBUTES = 30
 TARGET = NUMBER_OF_ATTRIBUTES
 BENIGNE = 0.0
+MALIGNE = 1.0
 
 class evaluated_entry:
     def __init__(self, dist, target):
         self.dist = dist
         self.target = target
 
-def read_training_data():
-    with open('./data/normalized/cancer_train.csv', newline='') as training:
+def read_csv(name):
+    with open(name, newline='') as training:
         entries = []
         rows = list(csv.reader(training, delimiter=' ', quotechar='|'))
         for row in rows[1:]:
@@ -18,6 +19,12 @@ def read_training_data():
             entry = list(map(float, entry))
             entries.append(entry)
         return entries
+
+def read_training_data():
+    return read_csv('./data/normalized/cancer_train.csv')
+
+def read_test_data():
+    return read_csv('./data/normalized/cancer_test.csv')
 
 def distance(traning_entry, entry):
     sum_distance = 0
@@ -34,9 +41,23 @@ def get_k_nearest(training_entries, entry, k):
     evaluated_entries.sort(key=lambda entry: entry.dist)
     return evaluated_entries[:k]
 
-entries = read_training_data()
-nearest_k = get_k_nearest(entries, entries[234], 3)
-i = 0
-for nearest in nearest_k:
-    print(str(i) + ': ' + str(nearest.dist) + ' = ' + str(nearest.target))
-    i += 1
+def get_result_value(nearest_k, k):
+    sum_evaluations = 0
+    for nearest in nearest_k:
+        sum_evaluations += nearest.target
+    avg_evaluations = sum_evaluations/k
+    return MALIGNE if avg_evaluations > 0.5 else BENIGNE
+
+def print_eval(exp, act):
+    res = 'CORRECT' if exp == act else 'WRONG'
+    print('EXP: ' + str(exp) + ' | ACT:  ' + str(act) + ' | ' + res)
+
+def evaluate(k):
+    training_data = read_training_data()
+    testing_data = read_test_data()
+    for test_entry in testing_data:
+        nearest_k = get_k_nearest(training_data, test_entry, k)
+        result = get_result_value(nearest_k, k)
+        print_eval(test_entry[TARGET], result)
+
+evaluate(3)
