@@ -52,12 +52,21 @@ def print_eval(exp, act):
     res = 'CORRECT' if exp == act else 'WRONG'
     print('EXP: ' + str(exp) + ' | ACT:  ' + str(act) + ' | ' + res)
 
+def is_correct(exp, act):
+    return exp == act
+
 def evaluate(k):
     training_data = read_training_data()
     testing_data = read_test_data()
+    num_of_entries = len(testing_data)
+    num_of_correct = 0
     for test_entry in testing_data:
         nearest_k = get_k_nearest(training_data, test_entry, k)
         result = get_result_value(nearest_k, k)
-        print_eval(test_entry[TARGET], result)
+        if is_correct(test_entry[TARGET], result):
+            num_of_correct += 1
+    return num_of_correct/num_of_entries
 
-evaluate(3)
+K_VALUES = [1,3,5,7,9,11,13,15]
+for k in K_VALUES:
+    print(str(k) + ': ' + str(evaluate(k)))
