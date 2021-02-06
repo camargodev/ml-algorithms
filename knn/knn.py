@@ -1,4 +1,5 @@
 import csv
+import sys
 
 NUMBER_OF_ATTRIBUTES = 30
 TARGET = NUMBER_OF_ATTRIBUTES
@@ -20,11 +21,11 @@ def read_csv(name):
             entries.append(entry)
         return entries
 
-def read_training_data():
-    return read_csv('./data/normalized/cancer_train.csv')
+def read_training_data(prefix):
+    return read_csv('./data/' + prefix + 'cancer_train.csv')
 
-def read_test_data():
-    return read_csv('./data/normalized/cancer_test.csv')
+def read_test_data(prefix):
+    return read_csv('./data/' + prefix + 'cancer_test.csv')
 
 def distance(traning_entry, entry):
     sum_distance = 0
@@ -55,9 +56,14 @@ def print_eval(exp, act):
 def is_correct(exp, act):
     return exp == act
 
+def get_prefix():
+    use_normalized = int(sys.argv[1])
+    return 'normalized/' if use_normalized == 1 else ''
+
 def evaluate(k):
-    training_data = read_training_data()
-    testing_data = read_test_data()
+    prefix = get_prefix()
+    training_data = read_training_data(prefix)
+    testing_data = read_test_data(prefix)
     num_of_entries = len(testing_data)
     num_of_correct = 0
     for test_entry in testing_data:
