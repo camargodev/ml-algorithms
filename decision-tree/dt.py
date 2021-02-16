@@ -30,26 +30,17 @@ def train_with_entropy(features, target):
 
 def train_with_gini(features, target):
     return train(GINI, features, target)
-    
-def export_output(name, decision_tree):
+
+
+def export_output(name, decision_tree, features, target):
     dot_data = tree.export_graphviz(decision_tree, out_file=None, 
-                        filled=True, rounded=True,  
-                        special_characters=True)  
+                        feature_names=features.columns,
+                        class_names=list(dict.fromkeys(target.values)),
+                        filled=True, rounded=True, special_characters=True)  
     graph = graphviz.Source(dot_data)  
     graph.render(name) 
 
 training_data = read_training_data()
 train_features, test_features, train_target, test_target = holdout(training_data)
-
-print("\ntrain_features")
-print(train_features)
-print("\ntest_features")
-print(test_features)
-print("\ntrain_target")
-print(train_target)
-print("\ntest_target")
-print(test_target)
-
-# parameters, classes = read_training_data()
-# decision_tree = train_with_entropy(parameters, classes)
-# export_output("test", decision_tree)
+decision_tree = train_with_entropy(train_features, train_target)
+export_output("entropy", decision_tree, train_features, train_target)
