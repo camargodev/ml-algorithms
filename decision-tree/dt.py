@@ -10,7 +10,7 @@ from pandas import read_csv
 ENTROPY = "entropy"
 GINI = "gini"
 TEST_SIZE = 0.2
-SEED = 1405
+SEED = 14051997
 
 def read_training_data():
     return read_csv('data/vote.tsv', sep='\t', header=0)
@@ -31,7 +31,6 @@ def train_with_entropy(features, target):
 def train_with_gini(features, target):
     return train(GINI, features, target)
 
-
 def export_output(name, decision_tree, features, target):
     dot_data = tree.export_graphviz(decision_tree, out_file=None, 
                         feature_names=features.columns,
@@ -40,7 +39,29 @@ def export_output(name, decision_tree, features, target):
     graph = graphviz.Source(dot_data)  
     graph.render(name) 
 
+def calculate_acuracy(decision_tree, features, targets):
+    predictions = decision_tree.predict(features)
+    targets = targets.values.tolist()
+    correct = 0
+    for i in range(len(predictions)):
+        if predictions[i] == targets[i]:
+            correct += 1
+    return correct/len(predictions)
+
+def compare_entropy_and_gini(train_features, test_features, train_target, test_target):
+    entropy_decision_tree = train_with_entropy(train_features, train_target)
+    entropy_acuracy = calculate_acuracy(entropy_decision_tree, test_features, test_target)
+    print("With Entropy: " + str(entropy_acuracy))
+
+    gini_decision_tree = train_with_gini(train_features, train_target)
+    gini_acuracy = calculate_acuracy(gini_decision_tree, test_features, test_target)
+    print("With Gini: " + str(gini_acuracy))
+
+    export_output("generated/ex1entropy", entropy_decision_tree, train_features, train_target)
+    export_output("generated/ex1gini", gini_decision_tree, train_features, train_target)
+
 training_data = read_training_data()
 train_features, test_features, train_target, test_target = holdout(training_data)
-decision_tree = train_with_entropy(train_features, train_target)
-export_output("entropy", decision_tree, train_features, train_target)
+
+# Exercise 1
+compare_entropy_and_gini(train_features, test_features, train_target, test_target)
