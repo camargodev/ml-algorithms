@@ -10,7 +10,20 @@ from pandas import read_csv
 ENTROPY = "entropy"
 GINI = "gini"
 TEST_SIZE = 0.2
-SEED = 14051997
+
+class AcuracyResults:
+  def __init__(self, avg, maxi, mini):
+    self.tree = tree
+    self.avg = avg
+    self.maxi = maxi
+    self.mini = mini
+
+class DecisionTreeResult:
+  def __init__(self, tree, acuracy, features, classes):
+    self.tree = tree
+    self.acuracy = acuracy
+    self.features = features
+    self.classes = classes
 
 def read_training_data():
     return read_csv('data/vote.tsv', sep='\t', header=0)
@@ -19,7 +32,7 @@ def holdout(training_data):
     training_data_frame =  DataFrame(training_data)
     features = training_data_frame.drop("target", axis=1)
     target = training_data_frame["target"]
-    return train_test_split(features, target, test_size=TEST_SIZE, random_state=SEED)
+    return train_test_split(features, target, test_size=TEST_SIZE)
 
 def train(criterion, features, target):
     decision_tree = tree.DecisionTreeClassifier(criterion=criterion)
@@ -31,13 +44,19 @@ def train_with_entropy(features, target):
 def train_with_gini(features, target):
     return train(GINI, features, target)
 
-def export_output(name, decision_tree, features, target):
-    dot_data = tree.export_graphviz(decision_tree, out_file=None, 
-                        feature_names=features.columns,
-                        class_names=list(dict.fromkeys(target.values)),
+def export_output(name, result):
+    dot_data = tree.export_graphviz(result.tree, out_file=None, 
+                        feature_names=result.features,
+                        class_names=result.classes,
                         filled=True, rounded=True, special_characters=True)  
     graph = graphviz.Source(dot_data)  
     graph.render(name) 
+
+def get_features_names(features):
+    return features.columns
+
+def get_class_names(target):
+    return list(dict.fromkeys(target.values))
 
 def calculate_acuracy(decision_tree, features, targets):
     predictions = decision_tree.predict(features)
@@ -48,20 +67,38 @@ def calculate_acuracy(decision_tree, features, targets):
             correct += 1
     return correct/len(predictions)
 
-def compare_entropy_and_gini(train_features, test_features, train_target, test_target):
-    entropy_decision_tree = train_with_entropy(train_features, train_target)
-    entropy_acuracy = calculate_acuracy(entropy_decision_tree, test_features, test_target)
-    print("With Entropy: " + str(entropy_acuracy))
+def compare_entropy_and_gini(training_data):
+    entropy = execute(ENTROPY, training_data)
+    print("AVG With Entropy: " + str(entropy.acuracy.avg))
+    print("MIN With Entropy: " + str(entropy.acuracy.mini))
+    print("MAX With Entropy: " + str(entropy.acuracy.maxi))
 
-    gini_decision_tree = train_with_gini(train_features, train_target)
-    gini_acuracy = calculate_acuracy(gini_decision_tree, test_features, test_target)
-    print("With Gini: " + str(gini_acuracy))
+    gini = execute(GINI, training_data)
+    print("AVG With Gini: " + str(gini.acuracy.avg))
+    print("MIN With Gini: " + str(gini.acuracy.mini))
+    print("MAX With Gini: " + str(gini.acuracy.maxi))
 
-    export_output("generated/ex1entropy", entropy_decision_tree, train_features, train_target)
-    export_output("generated/ex1gini", gini_decision_tree, train_features, train_target)
+    export_output("generated/ex1entropy", entropy)
+    export_output("generated/ex1gini", gini)
+
+def execute(criterion, training_data, number_of_repetitions=100):
+    total_acuracy = 0
+    min_val, max_val = 1000, 0
+    for _ in range(number_of_repetitions):
+        train_features, test_features, train_target, test_target = holdout(training_data)
+        decision_tree = train(criterion, train_features, train_target)
+        acuracy = calculate_acuracy(decision_tree, test_features, test_target)
+        total_acuracy += acuracy
+        min_val = min(min_val, acuracy)
+        max_val = max(max_val, acuracy)
+    avg_acuracy = total_acuracy/number_of_repetitions
+    acuracy = AcuracyResults(avg_acuracy, min_val, max_val)
+    features_names = get_features_names(train_features)
+    class_names = get_class_names(train_target)
+    return DecisionTreeResult(decision_tree, acuracy, features_names, class_names)
+
 
 training_data = read_training_data()
-train_features, test_features, train_target, test_target = holdout(training_data)
 
 # Exercise 1
-compare_entropy_and_gini(train_features, test_features, train_target, test_target)
+compare_entropy_and_gini(training_data)
