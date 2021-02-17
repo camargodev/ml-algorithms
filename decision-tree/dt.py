@@ -26,13 +26,18 @@ class DecisionTreeResult:
     self.classes = classes
 
 class SimpleTrainer:
-    def train(self, criterion, features, target, min_samples_leaf, max_depth):
+    def train(self, criterion, features, target, min_samples_leaf, max_depth, ccp_alpha=0):
         decision_tree = tree.DecisionTreeClassifier(criterion=criterion)
         return decision_tree.fit(features, target)
 
 class MinLeafsMaxDepthTrainer:
-    def train(self, criterion, features, target, min_samples_leaf, max_depth):
+    def train(self, criterion, features, target, min_samples_leaf, max_depth, ccp_alpha=0):
         decision_tree = tree.DecisionTreeClassifier(criterion=criterion, min_samples_leaf=min_samples_leaf, max_depth=max_depth)
+        return decision_tree.fit(features, target)
+
+class PrunningTrainer:
+    def train(self, criterion, features, target, min_samples_leaf, max_depth, ccp_alpha):
+        decision_tree = tree.DecisionTreeClassifier(criterion=criterion, ccp_alpha=ccp_alpha)
         return decision_tree.fit(features, target)
 
 def read_training_data():
@@ -81,12 +86,12 @@ def compare_entropy_and_gini(training_data):
     export_output("generated/ex1entropy", entropy)
     export_output("generated/ex1gini", gini)
 
-def execute(criterion, training_data, trainer, number_of_repetitions=100, min_samples_leaf=None, max_depth=None):
+def execute(criterion, training_data, trainer, number_of_repetitions=100, min_samples_leaf=None, max_depth=None, ccp_alpha=0):
     total_acuracy = 0
     min_val, max_val = 1000, 0
     for _ in range(number_of_repetitions):
         train_features, test_features, train_target, test_target = holdout(training_data)
-        decision_tree = trainer.train(criterion, train_features, train_target, min_samples_leaf, max_depth)
+        decision_tree = trainer.train(criterion, train_features, train_target, min_samples_leaf, max_depth, ccp_alpha)
         acuracy = calculate_acuracy(decision_tree, test_features, test_target)
         total_acuracy += acuracy
         min_val = min(min_val, acuracy)
@@ -107,6 +112,13 @@ def compare_versions_max_depth_min_samples_leaf(training_data):
             print("\nAVG With " + name + ": " + str(entropy.acuracy.avg))
             export_output("generated/" + name, entropy)
 
+def compare_versions_prunning(training_data):
+    ccp_alphas = [0, 0.001, 0.01, 0.1, 1.0]
+    for ccp_alpha in ccp_alphas:
+        entropy = execute(ENTROPY, training_data, PrunningTrainer(), ccp_alpha=ccp_alpha)
+        name = "prunning-" +str(ccp_alpha)
+        print("\nAVG With " + name + ": " + str(entropy.acuracy.avg))
+        export_output("generated/" + name, entropy)
 
 
 training_data = read_training_data()
@@ -115,4 +127,7 @@ training_data = read_training_data()
 # compare_entropy_and_gini(training_data)
 
 # Exercise 2
-compare_versions_max_depth_min_samples_leaf(training_data)
+# compare_versions_max_depth_min_samples_leaf(training_data)
+
+# Exercise 3
+compare_versions_prunning(training_data)
