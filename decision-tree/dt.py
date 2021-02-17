@@ -99,14 +99,12 @@ def execute(criterion, training_data, trainer, number_of_repetitions=100, min_sa
 
 def compare_versions_max_depth_min_samples_leaf(training_data):
     max_depths = [5, 7, 10]
-    min_samples_leafs = [10, 15, 20, 25]
+    min_samples_leafs = [1, 5, 25, 50]
     for max_depth in max_depths:
         for min_samples_leaf in min_samples_leafs:
             entropy = execute(ENTROPY, training_data, MinLeafsMaxDepthTrainer(), min_samples_leaf=min_samples_leaf, max_depth=max_depth)
             name = "md-" +str(max_depth) + "--msl-" + str(min_samples_leaf)
             print("\nAVG With " + name + ": " + str(entropy.acuracy.avg))
-            print("MIN With " + name + ": " + str(entropy.acuracy.mini))
-            print("MAX With " + name + ": " + str(entropy.acuracy.maxi))
             export_output("generated/" + name, entropy)
 
 
