@@ -25,6 +25,16 @@ class DecisionTreeResult:
     self.features = features
     self.classes = classes
 
+class SimpleTrainer:
+    def train(self, criterion, features, target, min_samples_leaf, max_depth):
+        decision_tree = tree.DecisionTreeClassifier(criterion=criterion)
+        return decision_tree.fit(features, target)
+
+class MinLeafsMaxDepthTrainer:
+    def train(self, criterion, features, target, min_samples_leaf, max_depth):
+        decision_tree = tree.DecisionTreeClassifier(criterion=criterion, min_samples_leaf=min_samples_leaf, max_depth=max_depth)
+        return decision_tree.fit(features, target)
+
 def read_training_data():
     return read_csv('data/vote.tsv', sep='\t', header=0)
 
@@ -33,16 +43,6 @@ def holdout(training_data):
     features = training_data_frame.drop("target", axis=1)
     target = training_data_frame["target"]
     return train_test_split(features, target, test_size=TEST_SIZE)
-
-def train(criterion, features, target):
-    decision_tree = tree.DecisionTreeClassifier(criterion=criterion)
-    return decision_tree.fit(features, target)
-
-def train_with_entropy(features, target):
-    return train(ENTROPY, features, target)
-
-def train_with_gini(features, target):
-    return train(GINI, features, target)
 
 def export_output(name, result):
     dot_data = tree.export_graphviz(result.tree, out_file=None, 
@@ -68,12 +68,12 @@ def calculate_acuracy(decision_tree, features, targets):
     return correct/len(predictions)
 
 def compare_entropy_and_gini(training_data):
-    entropy = execute(ENTROPY, training_data)
+    entropy = execute(ENTROPY, training_data, SimpleTrainer())
     print("AVG With Entropy: " + str(entropy.acuracy.avg))
     print("MIN With Entropy: " + str(entropy.acuracy.mini))
     print("MAX With Entropy: " + str(entropy.acuracy.maxi))
 
-    gini = execute(GINI, training_data)
+    gini = execute(GINI, training_data, SimpleTrainer())
     print("AVG With Gini: " + str(gini.acuracy.avg))
     print("MIN With Gini: " + str(gini.acuracy.mini))
     print("MAX With Gini: " + str(gini.acuracy.maxi))
@@ -81,24 +81,40 @@ def compare_entropy_and_gini(training_data):
     export_output("generated/ex1entropy", entropy)
     export_output("generated/ex1gini", gini)
 
-def execute(criterion, training_data, number_of_repetitions=100):
+def execute(criterion, training_data, trainer, number_of_repetitions=100, min_samples_leaf=None, max_depth=None):
     total_acuracy = 0
     min_val, max_val = 1000, 0
     for _ in range(number_of_repetitions):
         train_features, test_features, train_target, test_target = holdout(training_data)
-        decision_tree = train(criterion, train_features, train_target)
+        decision_tree = trainer.train(criterion, train_features, train_target, min_samples_leaf, max_depth)
         acuracy = calculate_acuracy(decision_tree, test_features, test_target)
         total_acuracy += acuracy
         min_val = min(min_val, acuracy)
         max_val = max(max_val, acuracy)
     avg_acuracy = total_acuracy/number_of_repetitions
-    acuracy = AcuracyResults(avg_acuracy, min_val, max_val)
+    acuracy = AcuracyResults(avg_acuracy, max_val, min_val)
     features_names = get_features_names(train_features)
     class_names = get_class_names(train_target)
     return DecisionTreeResult(decision_tree, acuracy, features_names, class_names)
+
+def compare_versions_max_depth_min_samples_leaf(training_data):
+    max_depths = [5, 7, 10]
+    min_samples_leafs = [10, 15, 20, 25]
+    for max_depth in max_depths:
+        for min_samples_leaf in min_samples_leafs:
+            entropy = execute(ENTROPY, training_data, MinLeafsMaxDepthTrainer(), min_samples_leaf=min_samples_leaf, max_depth=max_depth)
+            name = "md-" +str(max_depth) + "--msl-" + str(min_samples_leaf)
+            print("\nAVG With " + name + ": " + str(entropy.acuracy.avg))
+            print("MIN With " + name + ": " + str(entropy.acuracy.mini))
+            print("MAX With " + name + ": " + str(entropy.acuracy.maxi))
+            export_output("generated/" + name, entropy)
+
 
 
 training_data = read_training_data()
 
 # Exercise 1
-compare_entropy_and_gini(training_data)
+# compare_entropy_and_gini(training_data)
+
+# Exercise 2
+compare_versions_max_depth_min_samples_leaf(training_data)
