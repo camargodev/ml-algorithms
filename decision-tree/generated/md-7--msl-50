@@ -1,0 +1,21 @@
+digraph Tree {
+node [shape=box, style="filled, rounded", color="black", fontname=helvetica] ;
+edge [fontname=helvetica] ;
+0 [label=<physician fee freeze &le; 1.5<br/>entropy = 0.962<br/>samples = 348<br/>value = [214, 134]<br/>class = democrat>, fillcolor="#f5d0b5"] ;
+1 [label=<synfuels corporation cutback &le; 1.5<br/>entropy = 0.163<br/>samples = 209<br/>value = [204, 5]<br/>class = democrat>, fillcolor="#e6843e"] ;
+0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="True"] ;
+2 [label=<immigration &le; 0.5<br/>entropy = 0.261<br/>samples = 113<br/>value = [108, 5]<br/>class = democrat>, fillcolor="#e68742"] ;
+1 -> 2 ;
+3 [label=<entropy = 0.208<br/>samples = 61<br/>value = [59, 2]<br/>class = democrat>, fillcolor="#e68540"] ;
+2 -> 3 ;
+4 [label=<entropy = 0.318<br/>samples = 52<br/>value = [49, 3]<br/>class = democrat>, fillcolor="#e78945"] ;
+2 -> 4 ;
+5 [label=<entropy = 0.0<br/>samples = 96<br/>value = [96, 0]<br/>class = democrat>, fillcolor="#e58139"] ;
+1 -> 5 ;
+6 [label=<immigration &le; 0.5<br/>entropy = 0.373<br/>samples = 139<br/>value = [10, 129]<br/>class = republican>, fillcolor="#48a5e7"] ;
+0 -> 6 [labeldistance=2.5, labelangle=-45, headlabel="False"] ;
+7 [label=<entropy = 0.544<br/>samples = 64<br/>value = [8, 56]<br/>class = republican>, fillcolor="#55abe9"] ;
+6 -> 7 ;
+8 [label=<entropy = 0.177<br/>samples = 75<br/>value = [2, 73]<br/>class = republican>, fillcolor="#3ea0e6"] ;
+6 -> 8 ;
+}

@@ -1,0 +1,9 @@
+digraph Tree {
+node [shape=box, style="filled, rounded", color="black", fontname=helvetica] ;
+edge [fontname=helvetica] ;
+0 [label=<physician fee freeze &le; 1.5<br/>entropy = 0.963<br/>samples = 348<br/>value = [213, 135]<br/>class = democrat>, fillcolor="#f5d1b6"] ;
+1 [label=<entropy = 0.137<br/>samples = 208<br/>value = [204, 4]<br/>class = democrat>, fillcolor="#e6833d"] ;
+0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="True"] ;
+2 [label=<entropy = 0.344<br/>samples = 140<br/>value = [9, 131]<br/>class = republican>, fillcolor="#47a4e7"] ;
+0 -> 2 [labeldistance=2.5, labelangle=-45, headlabel="False"] ;
+}
