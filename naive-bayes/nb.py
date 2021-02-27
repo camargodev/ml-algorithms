@@ -16,20 +16,7 @@ def calculate_prob_mult(indexes, values):
 
 def calculate_prob(index, value):
     return calculate_prob_mult([index], [value])
-
-def calculate_prob_all(values):
-    return calculate_prob_mult([nb.PRICE_INDEX, nb.LUG_INDEX, nb.SAFE_INDEX, nb.TARGET_INDEX], values)
-
-def calculate_prob_all_no_target(values):
-    return calculate_prob_mult([nb.PRICE_INDEX, nb.LUG_INDEX, nb.SAFE_INDEX], values)
-
-def calculate_maximum_a_posteriori(indexes, values, index, value):
-    max_a_posteriori = 0
-    for i in range(len(indexes)):
-        prob_i =  calculate_prob_mult([indexes[i], index], [values[i], value])
-        max_a_posteriori = max(max_a_posteriori, prob_i)
-    return max_a_posteriori
-
+    
 def question_a():
     print("\nA. A priori, isto é, sem considerar os atributos de cada instância, é menos provável que uma nova instância seja da classe acc do que da classe unacc.")
     prob_acc = calculate_prob(nb.TARGET_INDEX, nb.ACCEPT)
