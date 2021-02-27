@@ -17,6 +17,19 @@ def calculate_prob_mult(indexes, values):
 def calculate_prob(index, value):
     return calculate_prob_mult([index], [value])
 
+def calculate_prob_all(values):
+    return calculate_prob_mult([nb.PRICE_INDEX, nb.LUG_INDEX, nb.SAFE_INDEX, nb.TARGET_INDEX], values)
+
+def calculate_prob_all_no_target(values):
+    return calculate_prob_mult([nb.PRICE_INDEX, nb.LUG_INDEX, nb.SAFE_INDEX], values)
+
+def calculate_maximum_a_posteriori(indexes, values, index, value):
+    max_a_posteriori = 0
+    for i in range(len(indexes)):
+        prob_i =  calculate_prob_mult([indexes[i], index], [values[i], value])
+        max_a_posteriori = max(max_a_posteriori, prob_i)
+    return max_a_posteriori
+
 def question_a():
     print("\nA. A priori, isto é, sem considerar os atributos de cada instância, é menos provável que uma nova instância seja da classe acc do que da classe unacc.")
     prob_acc = calculate_prob(nb.TARGET_INDEX, nb.ACCEPT)
@@ -61,7 +74,33 @@ def question_d():
     result = "VERDADEIRO" if prob_acc_given_safe_low == 0 else "FALSO"
     print("  >> " + result)
 
+def question_e():
+    print("\nE. As estimativas das probabilidades a posteriori para uma nova instância x com atributos price=high, lug_boot=med e safety=med seriam aproximadamente P(target=acc|x) = 0.019  e  P(target=unacc|x) = 0.021. Portanto, esta instância será classificada como unacc pelo modelo.")
+    print("  Considerando Maximum Likelihood: yML = argmax i[ P(x|yi) ]")
+
+    prob_high_price = calculate_prob(nb.PRICE_INDEX, nb.PRICE_HIGH)
+    prob_med_lug = calculate_prob(nb.SAFE_INDEX, nb.SAFE_MED)
+    prob_med_safe = calculate_prob(nb.LUG_INDEX, nb.LUG_MED)
+
+    print("    yML = argmax i[ P(x|yi) ], onde x = target=acc e y = [price=high, lug_boot=med, safety=med]:")
+
+    prob_acc_and_high_price = calculate_prob_mult([nb.TARGET_INDEX, nb.PRICE_INDEX], [nb.ACCEPT, nb.PRICE_HIGH])
+    prob_acc_given_high_price = prob_acc_and_high_price / prob_high_price
+    print("      P(price=high|target=acc) = " + str(prob_acc_given_high_price))
+
+    prob_acc_and_med_lug = calculate_prob_mult([nb.TARGET_INDEX, nb.SAFE_INDEX], [nb.ACCEPT, nb.SAFE_MED])
+    prob_acc_given_med_lug = prob_acc_and_med_lug / prob_med_lug
+    print("      P(lug_boot=med|target=acc) = " + str(prob_acc_given_med_lug))
+
+    prob_acc_and_med_safe = calculate_prob_mult([nb.TARGET_INDEX, nb.LUG_INDEX], [nb.ACCEPT, nb.LUG_MED])
+    prob_acc_given_med_safe = prob_acc_and_med_safe / prob_med_safe
+    print("      P(safety=med|target=acc) = " + str(prob_acc_given_med_safe))
+
+    max_likelihood_accept = max(prob_acc_given_high_price, prob_acc_given_med_lug, prob_acc_given_med_safe)
+    print("      yML with target=acc = " + str(max_likelihood_accept))
+
 
 question_a()
 question_c()
 question_d()
+question_e()
