@@ -33,10 +33,10 @@ def calculate_maximum_a_posteriori(indexes, values, index, value):
 def question_a():
     print("\nA. A priori, isto é, sem considerar os atributos de cada instância, é menos provável que uma nova instância seja da classe acc do que da classe unacc.")
     prob_acc = calculate_prob(nb.TARGET_INDEX, nb.ACCEPT)
-    prob_unnac = calculate_prob(nb.TARGET_INDEX, nb.NOT_ACCEPT)
+    prob_unacc = calculate_prob(nb.TARGET_INDEX, nb.NOT_ACCEPT)
     print("  P(target=acc): " + str(prob_acc))
-    print("  P(target=unacc): " + str(prob_unnac))
-    result = "VERDADEIRO" if prob_acc < prob_unnac else "FALSO"
+    print("  P(target=unacc): " + str(prob_unacc))
+    result = "VERDADEIRO" if prob_acc < prob_unacc else "FALSO"
     print("  >> " + result)
 
 def question_c():
@@ -52,9 +52,9 @@ def question_c():
 
     print("    P(lug_boot=med|target=unacc) = P(lug_boot=med ^ target=unacc) / P(target=unacc)")
     prob_lug_med_and_unacc = calculate_prob_mult([nb.LUG_INDEX, nb.TARGET_INDEX], [nb.LUG_MED, nb.NOT_ACCEPT])
-    prob_unnac = calculate_prob(nb.TARGET_INDEX, nb.NOT_ACCEPT)
-    prob_unacc_given_lug_med = prob_lug_med_and_unacc / prob_unnac
-    print("      P(lug_boot=med|target=unacc) = " + str(prob_lug_med_and_unacc) + " / " + str(prob_unnac))
+    prob_unacc = calculate_prob(nb.TARGET_INDEX, nb.NOT_ACCEPT)
+    prob_unacc_given_lug_med = prob_lug_med_and_unacc / prob_unacc
+    print("      P(lug_boot=med|target=unacc) = " + str(prob_lug_med_and_unacc) + " / " + str(prob_unacc))
     print("      P(lug_boot=med|target=unacc) = " + str(prob_unacc_given_lug_med))
 
     result = "VERDADEIRO" if prob_acc_given_lug_med > prob_unacc_given_lug_med else "FALSO"
@@ -76,28 +76,57 @@ def question_d():
 
 def question_e():
     print("\nE. As estimativas das probabilidades a posteriori para uma nova instância x com atributos price=high, lug_boot=med e safety=med seriam aproximadamente P(target=acc|x) = 0.019  e  P(target=unacc|x) = 0.021. Portanto, esta instância será classificada como unacc pelo modelo.")
-    print("  Considerando Maximum Likelihood: yML = argmax i[ P(x|yi) ]")
+    print("  Considerando P(yi|X) = P(yi) * ΠP(xj|yi), onde j vai de 1 a d")
 
-    prob_high_price = calculate_prob(nb.PRICE_INDEX, nb.PRICE_HIGH)
-    prob_med_lug = calculate_prob(nb.SAFE_INDEX, nb.SAFE_MED)
-    prob_med_safe = calculate_prob(nb.LUG_INDEX, nb.LUG_MED)
-
-    print("    yML = argmax i[ P(x|yi) ], onde x = target=acc e y = [price=high, lug_boot=med, safety=med]:")
-
+    print("    yi = target=acc e x = [price=high, lug_boot=med, safety=med]:")
+    prob_acc = calculate_prob(nb.TARGET_INDEX, nb.ACCEPT)
+    print("      P(target=acc) = " + str(prob_acc))
+    
     prob_acc_and_high_price = calculate_prob_mult([nb.TARGET_INDEX, nb.PRICE_INDEX], [nb.ACCEPT, nb.PRICE_HIGH])
-    prob_acc_given_high_price = prob_acc_and_high_price / prob_high_price
+    prob_acc_given_high_price = round((prob_acc_and_high_price / prob_acc), 4)
     print("      P(price=high|target=acc) = " + str(prob_acc_given_high_price))
 
-    prob_acc_and_med_lug = calculate_prob_mult([nb.TARGET_INDEX, nb.SAFE_INDEX], [nb.ACCEPT, nb.SAFE_MED])
-    prob_acc_given_med_lug = prob_acc_and_med_lug / prob_med_lug
+    prob_acc_and_med_lug = calculate_prob_mult([nb.TARGET_INDEX, nb.LUG_INDEX], [nb.ACCEPT, nb.LUG_MED])
+    prob_acc_given_med_lug = round((prob_acc_and_med_lug / prob_acc), 4)
     print("      P(lug_boot=med|target=acc) = " + str(prob_acc_given_med_lug))
 
-    prob_acc_and_med_safe = calculate_prob_mult([nb.TARGET_INDEX, nb.LUG_INDEX], [nb.ACCEPT, nb.LUG_MED])
-    prob_acc_given_med_safe = prob_acc_and_med_safe / prob_med_safe
+    prob_acc_and_med_safe = calculate_prob_mult([nb.TARGET_INDEX, nb.SAFE_INDEX], [nb.ACCEPT, nb.SAFE_MED])
+    prob_acc_given_med_safe = round((prob_acc_and_med_safe / prob_acc), 4)
     print("      P(safety=med|target=acc) = " + str(prob_acc_given_med_safe))
 
-    max_likelihood_accept = max(prob_acc_given_high_price, prob_acc_given_med_lug, prob_acc_given_med_safe)
-    print("      yML with target=acc = " + str(max_likelihood_accept))
+    prod_with_acc = round((prob_acc_given_high_price * prob_acc_given_med_lug * prob_acc_given_med_safe), 4)
+    print("      ΠP(xj|target=acc) = " + str(prod_with_acc))
+
+    prob_with_acc = round((prod_with_acc * prob_acc), 4)
+    print("      P(yi) * ΠP(xj|target=acc) = " + str(prob_with_acc))
+
+    print("    yi = target=unacc e x = [price=high, lug_boot=med, safety=med]:")
+    prob_unacc = calculate_prob(nb.TARGET_INDEX, nb.NOT_ACCEPT)
+    print("      P(target=unacc) = " + str(prob_unacc))
+    
+    prob_unacc_and_high_price = calculate_prob_mult([nb.TARGET_INDEX, nb.PRICE_INDEX], [nb.NOT_ACCEPT, nb.PRICE_HIGH])
+    prob_unacc_given_high_price = round((prob_unacc_and_high_price / prob_unacc), 4)
+    print("      P(price=high|target=unacc) = " + str(prob_unacc_given_high_price))
+
+    prob_unacc_and_med_lug = calculate_prob_mult([nb.TARGET_INDEX, nb.LUG_INDEX], [nb.NOT_ACCEPT, nb.LUG_MED])
+    prob_unacc_given_med_lug = round((prob_unacc_and_med_lug / prob_unacc), 4)
+    print("      P(lug_boot=med|target=unacc) = " + str(prob_unacc_given_med_lug))
+
+    prob_unacc_and_med_safe = calculate_prob_mult([nb.TARGET_INDEX, nb.SAFE_INDEX], [nb.NOT_ACCEPT, nb.SAFE_MED])
+    prob_unacc_given_med_safe = round((prob_unacc_and_med_safe / prob_unacc), 4)
+    print("      P(safety=med|target=unacc) = " + str(prob_unacc_given_med_safe))
+
+    prod_with_unacc = round((prob_unacc_given_high_price * prob_unacc_given_med_lug * prob_unacc_given_med_safe), 4)
+    print("      ΠP(xj|target=unacc) = " + str(prod_with_unacc))
+
+    prob_with_unacc = round((prod_with_unacc * prob_unacc), 4)
+    print("      P(yi) * ΠP(xj|target=unacc) = " + str(prob_with_unacc))
+
+
+    result = "VERDADEIRO" if prob_with_unacc > prob_with_acc else "FALSO"
+    print("  >> " + result)
+
+
 
 
 question_a()
