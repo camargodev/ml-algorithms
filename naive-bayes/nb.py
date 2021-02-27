@@ -39,6 +39,13 @@ def question_a():
     result = "VERDADEIRO" if prob_acc < prob_unacc else "FALSO"
     print("  >> " + result)
 
+def question_b():
+    print("\nB. O modelo Naïve Bayes considera que os atributos price, lug_boot e safety são estatisticamente independentes uns dos outros condicionado ao valor da classe (acc ou unacc).")
+    print("  Naïve Bayes ignora dependências entre atributos para simplificar o cálculo.")
+    print("  Em aula, foi dado um exemplo de possível dependência entre clima (chuvoso, ensolarado, etc) e uso de guarda-chuva (sim ou não).")
+    print("  Todavia, mesmo ignorando uma  dependencia como o exemplo acima, Naïve Bayes atinge bons resultados médios.")
+    print("  >> VERDADEIRO")
+
 def question_c():
     print("\nC. A probabilidade condicional do atributo lug_boot igual à 'med' é maior para a classe acc do que para a classe unacc.\n    Isto é, P(lug_boot=med|target=acc) > P(lug_boot=med|target=unacc).")
     print("  Considerando P(A|B) = P(A^B)/P(B), então: ")
@@ -98,7 +105,7 @@ def question_e():
     print("      ΠP(xj|target=acc) = " + str(prod_with_acc))
 
     prob_with_acc = round((prod_with_acc * prob_acc), 4)
-    print("      P(yi) * ΠP(xj|target=acc) = " + str(prob_with_acc))
+    print("      P(target=acc * ΠP(xj|target=acc) = " + str(prob_with_acc))
 
     print("    yi = target=unacc e x = [price=high, lug_boot=med, safety=med]:")
     prob_unacc = calculate_prob(nb.TARGET_INDEX, nb.NOT_ACCEPT)
@@ -120,16 +127,20 @@ def question_e():
     print("      ΠP(xj|target=unacc) = " + str(prod_with_unacc))
 
     prob_with_unacc = round((prod_with_unacc * prob_unacc), 4)
-    print("      P(yi) * ΠP(xj|target=unacc) = " + str(prob_with_unacc))
+    print("      P(target=unacc) * ΠP(xj|target=unacc) = " + str(prob_with_unacc))
 
 
     result = "VERDADEIRO" if prob_with_unacc > prob_with_acc else "FALSO"
     print("  >> " + result)
 
-
-
+def conclusion():
+    print("\n\nComo todas as questões se provaram verdadeiras, a correta a se assinalar é: ")
+    print("   F. Nenhuma das anteriores")
 
 question_a()
+question_b()
 question_c()
 question_d()
 question_e()
+
+conclusion()
