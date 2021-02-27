@@ -21,8 +21,8 @@ def question_a():
     print("\nA. A priori, isto é, sem considerar os atributos de cada instância, é menos provável que uma nova instância seja da classe acc do que da classe unacc.")
     prob_acc = calculate_prob(nb.TARGET_INDEX, nb.ACCEPT)
     prob_unnac = calculate_prob(nb.TARGET_INDEX, nb.NOT_ACCEPT)
-    print("  Probabilidade ACC: " + str(prob_acc))
-    print("  Probabilidade UNACC: " + str(prob_unnac))
+    print("  P(target=acc): " + str(prob_acc))
+    print("  P(target=unacc): " + str(prob_unnac))
     result = "VERDADEIRO" if prob_acc < prob_unnac else "FALSO"
     print("  >> " + result)
 
